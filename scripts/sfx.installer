@@ -1,0 +1,14 @@
+#!/bin/bash
+# The installer script of selfextractor
+
+target=$1
+target=${target:="/www/bifrost"}
+if test -e $target/conf/pushd.toml; then
+    install bin/pushd $target/bin/pushd
+    install bin/connd $target/bin/connd
+else
+    mkdir -p $target/data
+    touch $target/data/addr_blacklist
+    touch $target/data/username
+    cp -rvf * $target/
+fi

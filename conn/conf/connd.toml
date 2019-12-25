@@ -1,0 +1,312 @@
+#type: string, description: the file name to record connd PID, default: connd.pid
+#pid-filename = "connd.pid"
+
+
+[logger]
+
+
+[logger.debug-logger]
+
+#type: string, description: the default logger name, default: connd_debug
+#name = "connd_debug"
+
+#type: string, description: the default log path, default: logs/connd
+#path = "logs/connd"
+
+#type: string, description: log time format, default: 2006-01-02 15:04:05.999999999
+#format = "2006-01-02 15:04:05.999999999"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[logger.access-logger]
+
+#type: string, description: the default logger name, default: connd_debug
+#name = "connd_debug"
+
+#type: string, description: the default log path, default: logs/connd
+#path = "logs/connd"
+
+#type: string, description: log time format, default: 2006-01-02 15:04:05.999999999
+#format = "2006-01-02 15:04:05.999999999"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[logger.statistic-logger]
+
+#type: string, description: the default logger name, default: connd_debug
+#name = "connd_debug"
+
+#type: string, description: the default log path, default: logs/connd
+#path = "logs/connd"
+
+#type: string, description: log time format, default: 2006-01-02 15:04:05.999999999
+#format = "2006-01-02 15:04:05.999999999"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[etcd]
+
+#type: []string, rules: nonempty, description: etcd cluster endpoints, default: ['http://127.0.0.1:2379']
+#cluster = ["http://127.0.0.1:2379"]
+
+#type: string, description: username of etcd
+username = ""
+
+#type: string, description: password of the user
+password = ""
+
+
+
+[pubsub]
+
+
+[pubsub.topic]
+
+#type: bool, rules: boolean, description: enable cache opentracing, default: false
+#cache-enable = false
+
+#type: int, description: enable cache if topic subs over than threshold, default: 1000
+#cache-size = 1000
+
+#type: int, description: topic map downgrade threshold, default: 100
+#topicmap-threshold = 100
+
+#type: time.Duration, description: cancel scan if downgrade exceeded, default: 500ms
+#downgrade-limit = "500ms"
+
+#type: int, description: cancel scan if downgrade exceeded, default: 1000
+#downgrade-threshold = 1000
+
+
+
+[push-client]
+
+#type: string, rules: nonempty, description: service name of pushd, default: pushd
+#service = "pushd"
+
+#type: string, rules: nonempty, description: group name of pushd, default: group
+#group = "group"
+
+#type: string, rules: nonempty, description: region name of pushd, default: region
+#region = "region"
+
+#type: string, description: appkey of pushd, default: appkey
+#appkey = "appkey"
+
+#type: uint32, rules: numeric, description: the min number of pushd nodes, default: 3
+#min-privider-nodes = 3
+
+#type: []string, rules: netaddr, description: addresses of pushd cluser, discoverd from etcd if this option is empty or omited, default: []
+#cluster = []
+
+#type: int, rules: >0, description: call the pushd grpc retry times, default: 3
+#pushd-retry-times = 3
+
+#type: time.Duration, description: default time out, default: 600ms
+#default-timeout = "600ms"
+
+#type: time.Duration, description: packoff time, default: 100ms
+#backoff-time = "100ms"
+
+#type: time.Duration, description: slow log threshold for request to pushd, default: 100ms
+#request-slow-threshold = "100ms"
+
+
+
+[grpc]
+
+#type: string, rules: netaddr, description: gprc listen addr, default: 127.0.0.1:5051
+#listen = "127.0.0.1:5051"
+
+#type: time.Duration, description: slow log threshold for notfiy, default: 100ms
+#notify-slow-threshold = "100ms"
+
+
+
+[mqtt-server]
+
+
+[mqtt-server.session]
+
+#type: time.Duration, description: default keepalive time, defaule unit minute, default: 5m0s
+#default-keepalive = "5m0s"
+
+#type: time.Duration, description: max keepalive time, default: 10m0s
+#max-keepalive = "10m0s"
+
+#type: int, description: write chan size, default: 64
+#write-chan-size = 64
+
+#type: int64, description: pull request limitation, default: 100
+#pull-limit = 100
+
+#type: int64, description: range unack message limitation, default: 50
+#range-unack-limit = 50
+
+#type: string, description: client connetion auth
+auth = ""
+
+#type: int, description: default is 1024*1024 Byte, default: 1048576
+#packet-size-limit = 1048576
+
+
+
+[monitor]
+
+#type: string, description: listen address of the status server, default: 0.0.0.0:12345
+#listen = "0.0.0.0:12345"
+
+#type: bool, rules: boolean, description: enable opentracing, default: false
+#enable = false
+
+
+
+[tcp]
+
+#type: string, description: connect type[tls tcp ws wss]
+type = ""
+
+#type: string, description: listen address
+listen = ""
+
+#type: string, description: default region, default: beijing
+#region = "beijing"
+
+#type: string, description: register address to etcd
+register-addr = ""
+
+#type: string, description: pem file name
+pem = ""
+
+#type: string, description: key file name
+key = ""
+
+#type: string, description: tls session ticket file name. ticket use: openssl rand 32
+ticketkey = ""
+
+#type: string, rules: nonempty, description: register to etcd, default: service
+#servname = "service"
+
+#type: int, description: max connect client num, default: 300000
+#max-conn-cnt = 300000
+
+
+
+[tls]
+
+#type: string, description: connect type[tls tcp ws wss]
+type = ""
+
+#type: string, description: listen address
+listen = ""
+
+#type: string, description: default region, default: beijing
+#region = "beijing"
+
+#type: string, description: register address to etcd
+register-addr = ""
+
+#type: string, description: pem file name
+pem = ""
+
+#type: string, description: key file name
+key = ""
+
+#type: string, description: tls session ticket file name. ticket use: openssl rand 32
+ticketkey = ""
+
+#type: string, rules: nonempty, description: register to etcd, default: service
+#servname = "service"
+
+#type: int, description: max connect client num, default: 300000
+#max-conn-cnt = 300000
+
+
+
+[http]
+
+#type: string, description: connect type[tls tcp ws wss]
+type = ""
+
+#type: string, description: listen address
+listen = ""
+
+#type: string, description: default region, default: beijing
+#region = "beijing"
+
+#type: string, description: register address to etcd
+register-addr = ""
+
+#type: string, description: pem file name
+pem = ""
+
+#type: string, description: key file name
+key = ""
+
+#type: string, description: tls session ticket file name. ticket use: openssl rand 32
+ticketkey = ""
+
+#type: string, rules: nonempty, description: register to etcd, default: service
+#servname = "service"
+
+#type: int, description: max connect client num, default: 300000
+#max-conn-cnt = 300000
+
+
+
+[https]
+
+#type: string, description: connect type[tls tcp ws wss]
+type = ""
+
+#type: string, description: listen address
+listen = ""
+
+#type: string, description: default region, default: beijing
+#region = "beijing"
+
+#type: string, description: register address to etcd
+register-addr = ""
+
+#type: string, description: pem file name
+pem = ""
+
+#type: string, description: key file name
+key = ""
+
+#type: string, description: tls session ticket file name. ticket use: openssl rand 32
+ticketkey = ""
+
+#type: string, rules: nonempty, description: register to etcd, default: service
+#servname = "service"
+
+#type: int, description: max connect client num, default: 300000
+#max-conn-cnt = 300000
+

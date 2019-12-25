@@ -1,0 +1,291 @@
+#type: string, description: the file name to record pushd PID, default: pushd.pid
+#pid-filename = "pushd.pid"
+
+
+[logger]
+
+
+[logger.debug-logger]
+
+#type: string, description: the default logger name, default: pushd_debug
+#name = "pushd_debug"
+
+#type: string, description: the default log path, default: logs/pushd
+#path = "logs/pushd"
+
+#type: string, description: log time format, default: 2006-01-02 15:04:05.999999999
+#format = "2006-01-02 15:04:05.999999999"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[logger.access-logger]
+
+#type: string, description: the default logger name, default: pushd_debug
+#name = "pushd_debug"
+
+#type: string, description: the default log path, default: logs/pushd
+#path = "logs/pushd"
+
+#type: string, description: log time format, default: 2006-01-02 15:04:05.999999999
+#format = "2006-01-02 15:04:05.999999999"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[logger.tikv-logger]
+
+#type: string, rules: nonempty, description: the default log path, default: logs/tikv
+#path = "logs/tikv"
+
+#type: string, description: log level(debug, info, warn, error, panic, fatal), default: info
+#level = "info"
+
+#type: string, description: log time rotate pattern(s m h D M W), default: 0 0 0 * * *
+#time-rotate = "0 0 0 * * *"
+
+#type: bool, rules: boolean, description: true for enabling log compress, default: false
+#compress = false
+
+
+
+[status]
+
+#type: string, rules: nonempty, description: listen address of http server, default: 0.0.0.0:22345
+#listen = "0.0.0.0:22345"
+
+#type: bool, rules: boolean, description: enable opentracing, default: false
+#enable = false
+
+
+
+[server]
+
+#type: string, description: default callback service name and namepace tikv, default: pushd
+#servname = "pushd"
+
+#type: string, rules: nonempty, description: the region name of pushd, default: region
+#region = "region"
+
+#type: int64, rules: numeric, description: the capacity of token, default: 1000
+#cap = 1000
+
+#type: time.Duration, description: the interval for issuing tokens in millisecond, default: 100ms
+#fill-interval = "100ms"
+
+#type: int64, rules: numeric, description: the quantity of token to issue every interval, default: 100
+#quantum = 100
+
+#type: time.Duration, description: wait for this duration if failed to get token in millisecond, default: 0ms
+#max-wait = "0s"
+
+#type: string, rules: netaddr, description: address to listen, default: 127.0.0.1:5053
+#listen = "127.0.0.1:5053"
+
+
+[server.callback]
+
+#type: string, rules: nonempty, description: service name, default: callback
+#service = "callback"
+
+#type: string, rules: nonempty, description: region, default: region
+#region = "region"
+
+#type: string, description: application key, default: appkey
+#appkey = "appkey"
+
+#type: uint32, rules: numeric, description: the min number of callback nodes, default: 3
+#min-provider-nodes = 3
+
+#type: string, description: hash method load balancing to the client of callback, default: hash
+#load-balancing-mode = "hash"
+
+
+
+[server.connd]
+
+
+[server.connd.client]
+
+#type: int, rules: >=1024, description: the size of channel which used for notify, default: 1024
+#notify-chan-size = 1024
+
+#type: int, rules: >= 3, description: number of worker goroutines to process notifications, default: 10
+#worker-processes = 10
+
+#type: int, rules: >0, description: call the pushd grpc retry times, default: 3
+#retry-times = 3
+
+#type: time.Duration, description: default time out, default: 600ms
+#default-timeout = "600ms"
+
+#type: time.Duration, description: grpc slowlog threshold in millisecond, default: 100ms
+#slowlog = "100ms"
+
+
+
+[server.store]
+
+#type: bool, rules: boolean, description: business control id generation, default: false
+#biz-ctrl-mid = false
+
+#type: string, description: store name, default: tikv
+#name = "tikv"
+
+#type: time.Duration, description: slowlog threshold in millisecond, default: 100ms
+#slowlog = "100ms"
+
+#type: bool, rules: boolean, description: support session recovery or not, default: true
+#sessionrecovery = true
+
+
+[server.store.redis-store]
+
+
+[server.store.redis-store.queue]
+
+#type: uint64, rules: numeric, description: the max size of queue, default: 1000
+#size = 1000
+
+#type: bool, rules: boolean, description: abort connection when topic queue is overflow, default: false
+#abort-overflow = false
+
+#type: uint64, rules: numeric, description: retain message expire time, default: 20
+#expire = 20
+
+
+
+[server.store.redis-store.redis]
+
+#type: []string, rules: url, description: master cluster, default: ['redis://127.0.0.1:6379']
+#master = ["redis://127.0.0.1:6379"]
+
+#type: [][]string, rules: url, description: all slave clusters, default: [['redis://127.0.0.1:6379']]
+#slaves = [["redis://127.0.0.1:6379"]]
+
+#type: string, description: password to connect to redis
+auth = ""
+
+#type: int64, rules: >10, description: timeout of redis request in milliseconds, default: 5000
+#timeout = 5000
+
+#type: int, rules: <10000, description: max number of idle redis connections, default: 500
+#maxidle = 500
+
+#type: int, rules: >=0, description: max number of connections, 0 means no limited, default: 0
+#maxactive = 0
+
+#type: int64, rules: >=0, description: close connections after remaining idle for this duration, should be less than the server's timeout, when 0, no connection will be closed, default: 240000
+#idletimeout = 240000
+
+#type: bool, rules: boolean, description: block Get if exceeds the MaxActive, default: true
+#wait = true
+
+#type: time.Duration, description: slowlog threshold for redis option, default: 200ms
+#slowlog = "200ms"
+
+
+
+[server.store.tikv]
+
+#type: string, rules: nonempty, description: pb address in tidb, default: tikv://172.16.201.74:2379
+#pb-addrs = "tikv://172.16.201.74:2379"
+
+
+[server.store.tikv.gc]
+
+#type: bool, rules: boolean, description: enable store gc, default: true
+#enable = true
+
+#type: int64, rules: nonempty, description: gc batch limit number, default: 256
+#batch-limit = 256
+
+#type: time.Duration, rules: nonempty, description: gc interval, default: 1s
+#interval = "1s"
+
+#type: time.Duration, rules: nonempty, description: gc leader life time, default: 1m0s
+#leader-life-time = "1m0s"
+
+
+
+[server.store.tikv.tikv-gc]
+
+#type: bool, rules: boolean, description: enable tikv gc, default: true
+#enable = true
+
+#type: time.Duration, description: gc work tick interval, default: 20m
+#interval = "20m0s"
+
+#type: time.Duration, description: lease flush leader interval, default: 30m
+#leader-life-time = "30m0s"
+
+#type: time.Duration, description: safe point life time, default: 10m
+#safe-point-life-time = "10m0s"
+
+#type: int, description: gc work concurrency, default: 2
+#concurrency = 2
+
+
+
+[server.publish]
+
+#type: string, description: address to register into ETCD
+register-addr = ""
+
+#type: string, rules: nonempty, description: service name, default: publish
+#service = "publish"
+
+#type: string, rules: nonempty, description: group, default: group
+#group = "group"
+
+#type: string
+auth = ""
+
+#type: time.Duration, description: grpc slowlog threshold in millisecond, default: 100ms
+#grpc-slowlog = "100ms"
+
+
+
+[server.pushd]
+
+#type: string, rules: nonempty, description: service name, default: pushd
+#service = "pushd"
+
+#type: string, rules: nonempty, description: group, default: group
+#group = "group"
+
+#type: string, description: address to register into ETCD
+register-addr = ""
+
+#type: time.Duration, description: grpc slowlog threshold in millisecond, default: 100ms
+#grpc-slowlog = "100ms"
+
+
+
+[server.etcd]
+
+#type: []string, rules: nonempty, description: etcd cluster endpoints, default: ['http://127.0.0.1:2379']
+#cluster = ["http://127.0.0.1:2379"]
+
+#type: string, description: username of etcd
+username = ""
+
+#type: string, description: password of etcd
+password = ""
+

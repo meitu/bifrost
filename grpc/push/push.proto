@@ -1,0 +1,272 @@
+syntax = "proto3";
+
+package push;
+
+service PushService {
+    rpc Connect(ConnectReq) returns (ConnectResp) {}
+    rpc Disconnect(DisconnectReq) returns (DisconnectResp) {}
+    rpc Subscribe(SubscribeReq) returns (SubscribeResp) {}
+    rpc Unsubscribe(UnsubscribeReq) returns (UnsubscribeResp) {}
+    rpc MQTTPublish(PublishReq) returns (PublishResp) {}
+    rpc Pubrec(PubrecReq) returns (PubrecResp) {}
+    rpc Pubrel(PubrelReq) returns (PubrelResp) {}
+    rpc Pubcomp(PubcompReq) returns (PubcompResp) {}
+    rpc RangeUnack(RangeUnackReq) returns(RangeUnackResp) {}
+    rpc PutUnack(PutUnackReq) returns(PutUnackResp) {}
+    rpc DelUnack(DelUnackReq) returns (DelUnackResp) {}
+    rpc Pull(PullReq) returns (PullResp) {}
+    rpc PostSubscribe(PostSubscribeReq) returns(PostSubscribeResp) {}
+    rpc AddRoute(AddRouteReq) returns (AddRouteResp){}
+    rpc RemoveRoute(RemoveRouteReq) returns (RemoveRouteResp){}
+}
+
+message ConnectReq {
+    string ClientID = 1;
+    string Username = 2;
+    bytes Password = 3;
+    bool CleanSession = 4;
+    string GrpcAddress = 5;
+    string TraceID = 6;
+    string ClientAddress = 7;
+    int64 ConnectionID = 8;
+    string Service = 9;
+};
+
+// 该Topic当前读取位置Index和最新消息Index。
+// connd需要拉取区间[CurrentIndex, LastestIndex]
+// 内的全部消息。
+message Record {
+    string Topic = 1;
+    int32 Qos=2;
+    bytes CurrentIndex = 3;
+    bytes LastestIndex = 4;
+};
+
+message ConnectResp {
+    bytes Cookie = 1;
+    bool SessionPresent = 2;
+    repeated Record Records = 3;
+    string StatLabel = 4;
+    int32 MqttCode = 5;
+    int64 MessageID = 6;
+    string Service = 7;
+};
+
+message DisconnectReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    string GrpcAddress = 3;
+    bool CleanSession = 4;
+    string TraceID = 5;
+    bool Lost = 6;
+    string Service = 7;
+    string StatLabel = 8;
+    int64 ConnectionID = 9;
+    bool kick =10;
+};
+
+message DisconnectResp {
+}
+
+message SubscribeReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    repeated string Topics = 3;
+    repeated int32 Qoss = 4;
+    string TraceID = 5;
+    string Service = 6;
+    bool CleanSession = 7;
+    string StatLabel = 8;
+}
+
+message SubscribeResp {
+    bytes Cookie = 1;
+    repeated int32 Qoss = 2;
+    repeated bytes Index = 3;
+    repeated Message RetainMessage = 4; // Retain message body
+}
+
+message UnsubscribeReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    repeated string Topics = 3;
+    string TraceID = 4;
+    bool Lost = 5;
+    string Service = 6;
+    bool CleanSession = 7;
+    string StatLabel = 8;
+}
+
+message UnsubscribeResp {
+    bytes Cookie = 1;
+}
+
+message PublishReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    Message Message = 3;
+    string Service = 4;
+    string StatLabel = 5;
+}
+
+message PublishResp {
+    bytes Cookie = 1;
+}
+
+message PubrecReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    int64 MessageID = 3;
+    string TraceID = 4;
+    string GrpcAddress = 5;
+    string Service = 6;
+    bool CleanSession = 7;
+    string StatLabel = 8;
+}
+
+message PubrecResp {
+    bytes Cookie = 1;
+}
+
+message PubrelReq {
+    string ClientID = 1;
+    int64 MessageID = 2;
+    string TraceID = 3;
+    string Service = 4;
+}
+
+message PubrelResp {
+}
+
+message PubcompReq {
+    string ClientID = 1;
+    int64 MessageID = 2;
+    string TraceID = 3;
+    string Service = 4;
+    bool CleanSession = 5;
+}
+
+message PubcompResp {
+}
+
+message DelUnackReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    int64 MessageID = 3;
+    string TraceID = 4;
+    string Service = 5;
+    bool CleanSession = 6;
+    string StatLabel = 7;
+    bytes BizID = 8;
+}
+
+message DelUnackResp {
+    bytes Cookie = 1;
+    bytes BizID = 2;
+}
+
+// Pushd从指定Topic的指定位置Index返回至多Count条消息。
+message PullReq {
+    string TraceID = 1;
+    string Topic = 2;
+    bytes Offset = 3;
+    int64 Limit = 4;
+    string Service = 5;
+}
+
+// Index是下次拉取时的需要指定的Index。
+// 例如：
+//     PullReq中设置Index为5， Count为10，但是
+//     pushd仅返回了8条消息，则PullResp中Index
+//     的值为13，即第8条消息的下一条。
+// PacketID也是同样的逻辑。
+// 即，PullResp中返回的Index和PacketID就是下次
+// PullReq中的Index和PacketID。
+message PullResp {
+    repeated Message Messages = 1;
+    bytes Offset = 2;
+    bool Complete = 3;
+}
+
+message Message {
+    string Topic = 1;
+    int32 Qos = 2;
+    int64 MessageID = 3;
+    bytes Payload = 4;
+    string TraceID = 5;
+    bool Retain = 6;
+    bytes BizID = 7;
+    bytes Index = 8;
+}
+
+message UnackDesc {
+    string Topic = 1;
+    bytes Index = 2;
+    int64 MessageID = 3;
+    bytes BizID = 4;
+    string TraceID = 5;
+    bytes Payload = 6;
+}
+
+
+message RangeUnackReq{
+    string ClientID = 1;
+    string TraceID = 2;
+    int64 Limit = 3;
+    bytes Offset = 4;
+    string Service = 5;
+};
+
+message RangeUnackResp{
+    bytes Offset=1;
+    bool Complete=2;
+    repeated UnackDesc Messages=3;
+};
+
+message PutUnackReq{
+    string TraceID = 1;
+    string ClientID = 2;
+    repeated UnackDesc Messages = 3;
+    string Service = 4;
+    bool CleanSession = 5;
+}
+
+message PutUnackResp{
+}
+
+message PostSubscribeReq {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    string TraceID = 3;
+    string Service = 4;
+    repeated string Topics = 5;
+    repeated int32 Qoss = 6;
+    string StatLabel = 7;
+};
+
+message PostSubscribeResp {
+    bytes Cookie = 1;
+};
+
+message AddRouteReq {
+    string TraceID = 1;
+    string Service = 2;
+    string Topic = 3;
+    string GrpcAddress = 4;
+    uint64 Version = 5;
+};
+
+
+message AddRouteResp {
+};
+
+message RemoveRouteReq {
+    string TraceID = 1;
+    string Service = 2;
+    string Topic = 3;
+    string GrpcAddress = 4;
+    uint64 Version = 5;
+};
+
+message RemoveRouteResp{
+};

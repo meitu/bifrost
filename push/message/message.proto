@@ -1,0 +1,16 @@
+syntax = "proto3";
+package message;
+
+message Message {
+	string Topic = 1;
+	bytes Index = 2;
+	bytes Payload = 3;
+	int32 Qos = 4;  
+	string TraceID = 5;
+	bytes BizID = 6;
+	int64 CreateTime = 7; 
+	int64 ExpireAt = 8;
+	int64 MessageID = 9;
+};
+
+

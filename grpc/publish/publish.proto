@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package publish;
+
+enum ErrCode {
+    ErrOK = 0; //无错误
+    ErrNoSubScribers = 1; //无订阅者
+    ErrInternalError = 2; // 服务错误
+}
+
+service PublishService {
+    rpc Publish(PublishRequest) returns(PublishReply) {}
+    rpc DeleteQueue(DeleteQueueRequest) returns(DeleteQueueReply){} // 已经废弃
+}
+
+message Target {
+    string Topic = 1;
+    int32 Qos = 4;
+    bool IsRetain = 5;  
+
+    // fase:  bifrost can drop this message if necessary
+    // true:  bifrost will send this message to all clients that
+    //        subscribed this topic.
+    // Note: if set the NoneDowngrade to true, the corresponding message
+    // might block the later message(when too many clients subscribed
+    // this topic)
+    bool NoneDowngrade = 6;
+}
+message PublishRequest {
+    bytes MessageID = 1; //下发的消息ID
+    bytes Payload = 2; // 下发的消息体
+    repeated Target Targets = 3;
+    int32 Weight = 4;
+    string StatLabel =5;
+    int32  TTL = 6;
+    string AppKey = 7;
+    bytes Cookie = 8;
+}
+
+message PublishReply {
+    ErrCode ReturnCode = 1;
+    repeated ErrCode Results = 2;
+    repeated bytes Cursor = 3;
+    bytes Cookie = 4;
+}
+
+message DeleteQueueRequest {
+    string Topic = 1;
+}
+
+message DeleteQueueReply {
+}

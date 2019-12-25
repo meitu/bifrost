@@ -1,0 +1,16 @@
+
+syntax = "proto3";
+
+package lb;
+
+message SayReq {
+    string content = 1;
+}
+
+message SayResp {
+    string content = 1;
+}
+
+service Test{
+    rpc Say(SayReq) returns (SayResp) {}
+}

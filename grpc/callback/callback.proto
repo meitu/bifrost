@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package callback;
+
+
+enum ErrCode {
+    ErrOK = 0;//Connection accepted.
+    // 以下 字段已经被遗弃
+    ErrSkip = 1; // 跳过此操作并继续处理 , 通常场景为业务自己存储客户端的绘画信息,才会使用
+    ErrAbort = 2; // 中止进程，丢弃消息，不要发送ack
+    ErrContinue = 3; //发生错误，但继续处理，应该记录错误消息
+    ErrDisconnect = 4; //客户端断开
+    ErrAuthFailed = 5; //验证失败
+}
+
+// 客户端建立连接请求接口
+service OnConnect {
+    rpc OnConnect(OnConnectRequest) returns(OnConnectReply) {}
+}
+
+message OnConnectRequest {
+    string Username = 1; // mqtt username
+    bytes Password = 2;//mqtt password
+    string ClientID = 3; // mqtt clientid
+    bool CleanSession = 4; // 是否进行绘画恢复
+    string Address = 5; // connd 的地址。 已经被遗弃
+}
+
+message OnConnectReply {
+    ErrCode ConnectCode = 1;
+    bytes Cookie = 2;
+    string StatLabel = 3;
+}
+
+//发起订阅的
+service OnSubscribe {
+    rpc OnSubscribe(OnSubscribeRequest) returns(OnSubscribeReply) {}
+}
+//TODO repeated topics
+message SubscribeTopics {
+    string Topic = 1;
+    int32 Qos = 2;
+}
+message OnSubscribeRequest {
+    repeated SubscribeTopics SubTopics = 1;  //topic的集合
+    string ClientID = 2;
+    bytes Cookie = 3;
+}
+
+message OnSubscribeReply {
+    repeated bool Successes = 2;
+    bytes Cookie = 3;
+}
+
+//订阅完成 客户端回复订阅 ack 之后
+service PostSubscribe {
+    rpc PostSubscribe(PostSubscribeRequest) returns(PostSubscribeReply) {}
+}
+message PostSubscribeRequest {
+    repeated SubscribeTopics SubTopics = 1;
+    string ClientID = 2;
+    bytes Cookie = 3;
+}
+message PostSubscribeReply {
+    bytes Cookie = 2;
+}
+
+//业务感知 消息下发过程
+service OnPublish {
+    rpc OnPublish(OnPublishRequest) returns(OnPublishReply) {}
+}
+
+message OnPublishRequest {
+    string Topic = 1;
+    string ClientID = 2;
+    int32 Qos = 3;
+    bytes Message = 4;
+    bytes Cookie = 5;
+    string StatLabel = 6;
+}
+
+message OnPublishReply {
+    bool Skip = 1;
+    bytes Cookie = 2;
+    bytes BizID = 3;
+    bytes Message = 4;
+}
+
+service OnUnsubscribe {
+    rpc OnUnsubscribe(OnUnsubscribeRequest) returns(OnUnsubscribeReply) {}
+}
+
+message OnUnsubscribeRequest {
+    repeated string Topics = 1;
+    string ClientID = 2;
+    bytes Cookie = 3;
+    bool LostConnection = 4;//client 是否是异常断开链接 默认不是 
+}
+
+message OnUnsubscribeReply {
+    bytes Cookie = 2;
+}
+
+service OnDisconnect {
+    rpc OnDisconnect(OnDisconnectRequest) returns(OnDisconnectReply) {}
+}
+message OnDisconnectRequest {
+    string ClientID = 1;
+    bytes Cookie = 2;
+    bool LostConnection = 3; //client 是否是异常断开链接 默认不是
+}
+message OnDisconnectReply {
+}
+
+//业务感知消息下发成功
+//消息下发成功之后 回复的ack 的调用 
+service OnACK {
+    rpc OnACK(OnACKRequest) returns(OnACKReply){}
+}
+
+message OnACKRequest {
+    bytes BizID= 1;
+    string ClientID = 2;
+    bytes Cookie = 3;
+    /* string Topic = 4; */
+}
+
+message OnACKReply {
+    bytes Cookie = 2;
+}
+
+service OnOffline{
+    rpc OnOffline(OnOfflineRequest) returns(OnOfflineReply) {}
+}
+message OnOfflineRequest{
+    string ClientID = 1;
+    bytes Message = 2;
+    string Topic = 3;
+    bytes Cookie = 4;
+    repeated string Subers = 5;
+}
+message OnOfflineReply {
+    bytes Cookie = 1;
+}
