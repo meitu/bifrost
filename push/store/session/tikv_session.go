@@ -107,7 +107,15 @@ func (s *tiSession) SetCursor(ns, client string, topic string, cursor []byte) er
 	if err != nil {
 		return err
 	}
-	return cur.Set(topic, cursor)
+
+	if _, err = cur.Get(topic); err == nil {
+		return nil
+	}
+
+	if util.IsErrNotFound(err) {
+		return cur.Set(topic, cursor)
+	}
+	return err
 }
 
 // Cursor get the topic of record where the client message was sent

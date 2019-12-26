@@ -275,7 +275,8 @@ func (ctx *SessionContext) SubUpdateInfo(topics []string, indexs [][]byte, qoss 
 		record, ok := ctx.PullInfo[topics[i]]
 		if ok {
 			record.QoS = byte(qoss[i])
-			record.Latest = indexs[i]
+			// If there must be a painting restore created
+			// record.Latest = indexs[i]
 			continue
 		}
 
