@@ -194,7 +194,7 @@ auth = ""
 type = ""
 
 #type: string, description: listen address
-listen = ""
+listen = ":1884"
 
 #type: string, description: default region, default: beijing
 #region = "beijing"

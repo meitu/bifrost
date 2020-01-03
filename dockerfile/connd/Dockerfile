@@ -1,17 +1,13 @@
-FROM 172.16.200.19:5000/alpine/golang:latest
+FROM golang:1.12
 
-COPY commons $GOPATH/src/github.com/meitu/bifrost/commons
-COPY grpc $GOPATH/src/github.com/meitu/bifrost/grpc
-COPY version $GOPATH/src/github.com/meitu/bifrost/version
-COPY vendor $GOPATH/src/github.com/meitu/bifrost/vendor
-COPY connd $GOPATH/src/github.com/meitu/bifrost/connd
+COPY . $GOPATH/src/github.com/meitu/bifrost
 
-COPY connd/conf/connd.toml /bifrost/conf/connd.toml
-COPY connd/data /bifrost/data
+WORKDIR  $GOPATH/src/github.com/meitu/bifrost/conn/bin/connd
 
-RUN go install github.com/meitu/bifrost/connd
+RUN GO111MODULE=on go build .
 
-EXPOSE 1884 50051 12345
-WORKDIR /bifrost
+EXPOSE 1884 5051 12345
 
-CMD $GOPATH/bin/connd -c /bifrost/conf/connd.toml
+WORKDIR  $GOPATH/src/github.com/meitu/bifrost/conn
+
+CMD bin/connd/connd -c conf/connd.toml
