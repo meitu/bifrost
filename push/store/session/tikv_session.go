@@ -326,8 +326,13 @@ func (s *tiSession) Unack(ns, client string, descs []*pbMessage.Message) error {
 		}
 		datas = append(datas, data)
 		// update cursor
+		cur, err := s.getSessionCursorMap(ns, client)
+		if err != nil {
+			return err
+		}
+
 		offset := incr_uuid.OffsetFromBytes(desc.Index).Next()
-		if err = s.SetCursor(ns, client, desc.Topic, offset.Bytes()); err != nil {
+		if err := cur.Set(desc.Topic, offset.Bytes()); err != nil {
 			return err
 		}
 	}
