@@ -191,10 +191,10 @@ auth = ""
 [tcp]
 
 #type: string, description: connect type[tls tcp ws wss]
-type = ""
+type = "tcp"
 
 #type: string, description: listen address
-listen = ":1884"
+listen = ":1883"
 
 #type: string, description: default region, default: beijing
 #region = "beijing"

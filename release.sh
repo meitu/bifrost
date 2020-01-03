@@ -1,5 +1,4 @@
 #!/bin/bash
-sha1=$(git log --pretty=format:'%h' -n 1 2>/dev/null)
 branch=`git branch --contains | grep "* " | sed "s/\* //g"`
 
 version="$branch"
@@ -17,7 +16,7 @@ if [ "$1" == "images" ]; then
     exit
 fi
 
-name=bifrost-$version-$sha1
+name=bifrost-release
 
 ./build.sh
 

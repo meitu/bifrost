@@ -6,7 +6,7 @@ WORKDIR  $GOPATH/src/github.com/meitu/bifrost/conn/bin/connd
 
 RUN GO111MODULE=on go build .
 
-EXPOSE 1884 5051 12345
+EXPOSE 1883 5051 12345
 
 WORKDIR  $GOPATH/src/github.com/meitu/bifrost/conn
 
