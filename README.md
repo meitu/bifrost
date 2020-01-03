@@ -1,5 +1,6 @@
 # bifrost
-A MQTT message broker
+A MQTT message broker based on [MQTT v3.1.1](http://mqtt.org) 
+
 
 ## Why Bifrost?
 * Completely compatible with mqtt protocol
@@ -15,6 +16,7 @@ A MQTT message broker
 
 
 ## Architecture
+![bifrost](docs/bifrost.png)
 
 ## Quick Start
 ### Building the base environment
@@ -37,3 +39,6 @@ To setup redis, please follow official [instruction](https://redis.io/)
 ### Test
 1. cd misc/example/ && go build 
 2. ./message_test_a2a 
+
+## Example
+You can refer to directory 1 (misc/linktest) and directory 2 (misc/example)
