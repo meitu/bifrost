@@ -18,6 +18,11 @@ A MQTT message broker based on [MQTT v3.1.1](http://mqtt.org)
 ## Architecture
 ![bifrost](docs/bifrost.png)
 
+* connd: the session layer manages the flow of client state.
+* pushd: the business layer implements business callbacks and data persistence
+* etcd cluster: service discovery, routing metadata store.
+* DB : user state storage, support two types of tikv, redis storage.
+
 ## Quick Start
 ### Building the base environment
 #### Etcd
