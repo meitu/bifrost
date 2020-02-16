@@ -3,7 +3,6 @@ package util
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
@@ -164,7 +163,7 @@ func (q *queue) GetN(topic string, cursor []byte, count int64) ([]byte, []*pbMes
 				topic, index+int64(i), count, err)
 		}
 		messages[i] = message
-		messages[i].Index = []byte(strconv.Itoa(int(index) + i))
+		messages[i].Index = EncodeInt64(index + int64(i))
 	}
 
 	return EncodeInt64(last + 1), messages, nil

@@ -187,10 +187,26 @@ func (t *Subscribers) Destory() {
 
 // Pull messages from cache or pushd
 func (t *Subscribers) Pull(ctx context.Context, req *ph.PullReq) (*ph.PullResp, error) {
-	if t.cf.CacheEnabled && t.bs.ValidSize() > 1 {
-		return t.GetCache(ctx, req)
+	var (
+		resp *ph.PullResp
+		err  error
+	)
+	vcount := t.bs.ValidSize()
+	if t.cf.CacheEnabled && vcount > t.cf.CacheEnabledCount {
+		resp, err = t.GetCache(ctx, req)
+	} else {
+		resp, err = t.pull(ctx, req)
 	}
-	return t.pull(ctx, req)
+
+	if err != nil || t.cf.DownQoSThreshold == 0 || vcount <= t.cf.DownQoSThreshold {
+		return resp, err
+	}
+
+	// message dwon qos
+	for _, m := range resp.Messages {
+		m.Qos = 0
+	}
+	return resp, err
 }
 
 func (t *Subscribers) pull(ctx context.Context, req *ph.PullReq) (*ph.PullResp, error) {
@@ -225,9 +241,6 @@ func (t *Subscribers) GetCache(ctx context.Context, req *ph.PullReq) (*ph.PullRe
 	resp, err := t.pull(ctx, req)
 	if err != nil {
 		return resp, err
-	}
-	if l := len(resp.Messages); l > 0 {
-		resp.Offset = append(resp.Messages[l-1].Index, byte(0))
 	}
 	t.cache.putMessages(req.Offset, resp.Messages)
 	return resp, nil
