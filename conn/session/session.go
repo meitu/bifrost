@@ -232,6 +232,11 @@ func (s *Session) pull(traceID string) {
 	var records map[string]context.PullInfo
 	// other message
 	for {
+		if s.CompareState(context.ClosedState) {
+			s.ctx.StorePullState(context.Idle)
+			return
+		}
+
 		// pull
 		if records = s.ctx.GetNeedPullInfo(); records == nil {
 			return
@@ -406,6 +411,10 @@ func (s *Session) IsWrite(noWriteHandler func(), writeHandler func()) bool {
 // if there is no the handle of function . create one
 func (s *Session) PutReadBuffer(pkg packets.ControlPacket) error {
 	for {
+		if s.CompareState(context.ClosedState) {
+			return nil
+		}
+
 		s.readPacketMutex.Lock()
 		// TODO 128 configuration management
 		if len(s.readBufferPackets) >= 128 {

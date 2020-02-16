@@ -62,6 +62,8 @@ type Pubsub struct {
 // TODO
 type Topic struct {
 	CacheEnabled       bool          `cfg:"cache-enable; false; boolean; enable cache opentracing"`
+	DownQoSThreshold   int           `cfg:"down-qos-threshold; 0; ;the number of clients greater than down-qos-threshold  performs QoS tuning to 0 "`
+	CacheEnabledCount  int           `cfg:"cache-enable-count; 1; ;the min count enable cache"`
 	CacheBufferSize    int           `cfg:"cache-size; 1000;; enable cache if topic subs over than threshold"`
 	DiscardThreshold   int           `cfg:"topicmap-threshold; 100; ; topic map downgrade threshold"`
 	DowngradeLimit     time.Duration `cfg:"downgrade-limit; 500ms; ; cancel scan if downgrade exceeded"`

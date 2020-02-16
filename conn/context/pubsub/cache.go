@@ -16,6 +16,7 @@ type Cache struct {
 	buf   []*ph.Message
 	front int
 	rear  int
+	noff  []byte // next offset
 }
 
 func newCache(size int) *Cache {
@@ -41,9 +42,9 @@ func (c *Cache) getResp(offset []byte) *ph.PullResp {
 	// 1. cache为空
 	// 2. offset大于缓冲区的结尾
 	// 3. offset小于buf[front-1]
-	if c.front == c.rear ||
-		BytesCompare(offset, c.buf[(c.rear-1+c.size)%c.size].Index, Greater) ||
-		BytesCompare(offset, c.buf[(c.front-1+c.size)%c.size].Index, LessOrEqual) {
+	if c.rear == c.front ||
+		BytesCompare(offset, c.lastIndex(), Greater) ||
+		BytesCompare(offset, c.startOffsetIndex(), LessOrEqual) {
 		return nil
 	}
 	i := c.front
@@ -51,7 +52,8 @@ func (c *Cache) getResp(offset []byte) *ph.PullResp {
 	for i != c.rear && BytesCompare(c.buf[i].Index, offset, Less) {
 		i = (i + 1) % c.size
 	}
-	if i == c.rear {
+
+	if c.rear == i {
 		return nil
 	}
 
@@ -60,8 +62,16 @@ func (c *Cache) getResp(offset []byte) *ph.PullResp {
 		resp.Messages = append(resp.Messages, c.buf[i])
 		i = (i + 1) % c.size
 	}
-	resp.Offset = append(c.buf[(c.rear-1+c.size)%c.size].Index, byte(0))
+	resp.Offset = c.noff
 	return resp
+}
+
+func (c *Cache) lastIndex() []byte {
+	return c.buf[(c.rear-1+c.size)%c.size].Index
+}
+
+func (c *Cache) startOffsetIndex() []byte {
+	return c.buf[(c.front-1+c.size)%c.size].Index
 }
 
 // putResp 将拉取回来的消息与cache中的消息进行合并
@@ -71,16 +81,21 @@ func (c *Cache) getResp(offset []byte) *ph.PullResp {
 // 1. 当前队列为空
 // 2. 拉取消息的offset是队列的末尾元素补位生成
 // 3. 拉取回来的消息与当前区间有重叠
-func (c *Cache) putMessages(offset []byte, msgs []*ph.Message) {
+func (c *Cache) putMessages(offset, noff []byte, msgs []*ph.Message) {
 	if len(msgs) == 0 {
 		return
 	}
-
-	if c.front == c.rear /*当前队列为空*/ ||
-		(len(offset) > 0 && BytesCompare(offset[:len(offset)-1], c.buf[(c.rear-1+c.size)%c.size].Index, Equal)) /*上次结尾的offset与这次拉取起始位置重叠*/ {
-		c.updateBuf(offset, msgs)
+	if c.front == c.rear {
+		c.updateBuf(offset, noff, msgs)
 		return
 	}
+
+	// 上次结尾的offset与这次拉取起始位置重叠
+	if BytesCompare(c.noff, offset, Equal) {
+		c.updateBuf(offset, noff, msgs)
+		return
+	}
+
 	// 对于如下情况直接跳过
 	// 1. 拉取消息区间在缓冲区间之前
 	//    buf     |------------|
@@ -88,28 +103,32 @@ func (c *Cache) putMessages(offset []byte, msgs []*ph.Message) {
 	// 2. 拉取消息区间超过缓冲区的范围
 	//    buf     |------------|
 	//    msgs                    |----|
-	if BytesCompare(msgs[len(msgs)-1].Index, c.buf[(c.rear-1+c.size)%c.size].Index, Less) ||
-		BytesCompare(c.buf[(c.rear-1+c.size)%c.size].Index, msgs[0].Index, Less) {
-		return
-	}
+	// 3. msgs  在 msgs 区间内
+	//    buf     |------------|
+	//    msgs         |----|
 
 	// 拉取消息与缓冲区重叠，并且msgs的内容超过buf中的内容
 	// buf     |------------|
 	// msgs               |----|
-	i := 0
-	lastIndex := c.buf[(c.rear-1+c.size)%c.size].Index
-	for BytesCompare(msgs[i].Index, lastIndex, LessOrEqual) {
-		i++
-	}
-	if i < len(msgs) {
-		c.updateBuf(offset, msgs[i:])
+	li := c.lastIndex()
+	if BytesCompare(msgs[len(msgs)-1].Index, li, Greater) &&
+		BytesCompare(li, msgs[0].Index, GreaterOrEqual) {
+		// msg 中的 0 位置 index  一定小于等于 li
+		// 因此从 1 位置开始寻找大于 li的元素
+		i := 1
+		for BytesCompare(msgs[i].Index, li, LessOrEqual) {
+			i++
+		}
+		if i < len(msgs) {
+			c.updateBuf(offset, noff, msgs[i:])
+		}
 	}
 }
 
 // updateBuf 将msgs数据追加到cache的结尾
 // offset 拉取请求的offset, 当队列为空的时候，将offset放到front之前
 // msgs   需要追加的消息列表
-func (c *Cache) updateBuf(offset []byte, msgs []*ph.Message) {
+func (c *Cache) updateBuf(offset, noff []byte, msgs []*ph.Message) {
 	if len(msgs) == 0 {
 		return
 	}
@@ -128,4 +147,6 @@ func (c *Cache) updateBuf(offset []byte, msgs []*ph.Message) {
 			c.front = (c.front + 1) % c.size
 		}
 	}
+
+	c.noff = noff
 }
